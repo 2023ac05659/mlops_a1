@@ -17,10 +17,10 @@ COPY README.md ./README.md
 COPY SUMMARY.md ./SUMMARY.md
 
 RUN mkdir -p models logs
-COPY models/RandomForestClassifier.pkl ./models/RandomForestClassifier.pkl
 
 ENV MODEL_SOURCE=local
-ENV BEST_MODEL_PATH=models/RandomForestClassifier.pkl
+ENV BEST_MODEL_PATH=models/best_model.pkl
+COPY models/best_model.pkl ./models/best_model.pkl
 ENV PRED_DB_PATH=logs/predictions.db
 
 EXPOSE 8000
