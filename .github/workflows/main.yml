@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -13,6 +14,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'pip'
 
     - name: Install dependencies
       run: |
@@ -23,25 +25,33 @@ jobs:
     - name: Lint
       run: flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
+
+    - name: Prepare data & train
+      run: |
+        python data.py
+        python train.py
+
+    - name: Tests
+      run: pytest -q
+
     - name: Build Docker image
       run: docker build -t mlops-iris .
 
 
     - name: Login to Docker Hub
-      if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/bonus'
       env:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKERHUB_TOKEN: ${{ secrets.DOCKER_PASSWORD }}
       run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
     - name: Push image
-      if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/bonus'
       env:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       run: |
         IMAGE="$DOCKERHUB_USERNAME/mlops-iris"
         docker tag mlops-iris $IMAGE:latest
-        # optional content-addressable tag
         docker tag mlops-iris $IMAGE:${{ github.sha }}
         docker push $IMAGE:latest
         docker push $IMAGE:${{ github.sha }}

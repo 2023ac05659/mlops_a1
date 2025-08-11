@@ -4,3 +4,8 @@ fastapi
 uvicorn
 mlflow
 joblib
+matplotlib
+numpy
+prometheus_client
+httpx
+pytest
