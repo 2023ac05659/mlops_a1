@@ -1,0 +1,28 @@
+# Python / venv
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local runs & artifacts
+mlruns/
+mlruns_artifacts/
+logs/
+artifacts/
+notebooks/
+*.db
+
+# Models (only keep best_model.pkl)
+models/*
+!models/best_model.pkl
+
+# Data
+data/
+
+# VCS / OS / IDE
+.git/
+.gitignore
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
