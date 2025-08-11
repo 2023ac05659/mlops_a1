@@ -32,7 +32,7 @@ jobs:
         python src/train.py
 
     - name: Tests
-      run: pytest -q
+      run: PYTHONPATH=. pytest -q
 
     - name: Build Docker image
       run: docker build -t mlops-iris .
