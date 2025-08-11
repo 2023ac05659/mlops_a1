@@ -28,8 +28,8 @@ jobs:
 
     - name: Prepare data & train
       run: |
-        python data.py
-        python train.py
+        python src/data.py
+        python src/train.py
 
     - name: Tests
       run: pytest -q
