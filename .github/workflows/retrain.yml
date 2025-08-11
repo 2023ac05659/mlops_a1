@@ -1,0 +1,50 @@
+name: Retrain & Publish on Data Change
+
+on:
+  push:
+    paths:
+      - "data/**"
+      - "train.py"
+      - "src/**"
+
+jobs:
+  retrain-build-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: "pip"
+
+    - name: Install deps
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Ensure data & retrain
+      run: |
+        python data.py   # no-op if file already present
+        python train.py  # produces models/best_model.pkl
+
+    - name: Build image
+      run: docker build -t mlops-iris .
+
+    - name: Login to Docker Hub
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKER_PASSWORD }}
+      run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+    - name: Push image
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      run: |
+        IMAGE="$DOCKERHUB_USERNAME/mlops-iris"
+        docker tag mlops-iris $IMAGE:latest
+        docker tag mlops-iris $IMAGE:${{ github.sha }}
+        docker push $IMAGE:latest
+        docker push $IMAGE:${{ github.sha }}
